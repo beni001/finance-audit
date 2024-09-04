@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "es2017",                        // Target ECMAScript versionnpm start
+    "lib": ["dom", "es2017"], // Libraries to include
+    "allowJs": true,                       // Allow JavaScript files to be compiled
+    "skipLibCheck": true,                  // Skip type checking of declaration files
+    "esModuleInterop": true,               // Enables emit interoperability between CommonJS and ES Modules
+    "allowSyntheticDefaultImports": true,  // Allows default imports from modules with no default export
+    "strict": true,                        // Enables all strict type-checking options
+    "forceConsistentCasingInFileNames": true, // Ensures that casing is consistent in imports
+    "noFallthroughCasesInSwitch": true,    // Ensures all switch cases have a break or return
+    "module": "esnext",                    // Module system to use
+    "moduleResolution": "node",            // Module resolution strategy
+    "resolveJsonModule": true,             // Allows importing JSON modules
+    "isolatedModules": true,               // Ensures each file can be safely transpiled independently
+    "noEmit": true,                        // Do not emit output
+    "jsx": "react"                         // JSX code generation mode
+  },
+  "include": ["src"]                      // Files to include in the project
+}
