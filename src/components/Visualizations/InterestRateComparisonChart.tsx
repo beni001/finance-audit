@@ -1,9 +1,6 @@
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DebtData, InterestRateAnalysisType } from '../../types/componentProps';
-
-// Remove this line as it's now redundant
-// type InterestRateAnalysisType = 'interestRate' | 'averageMaturity';
+import { DebtData, InterestRateAnalysisType, InterestRateComparisonChartProps } from '../../types';
 
 interface ChartData {
   year: number;
@@ -11,28 +8,27 @@ interface ChartData {
   averageMaturity: number;
 }
 
-interface InterestRateComparisonChartProps {
-  debtData: DebtData[];
-  analysisType: InterestRateAnalysisType;
-}
-
 const InterestRateComparisonChart: React.FC<InterestRateComparisonChartProps> = ({ debtData, analysisType }) => {
   const chartData: ChartData[] = useMemo(() => {
     return debtData.map(entry => ({
       year: entry.year,
       interestRate: entry.interestRate,
-      averageMaturity: 'averageMaturity' in entry ? Number(entry.averageMaturity) : 0,
+      averageMaturity: entry.averageMaturity || 0,
     }));
   }, [debtData]);
 
   const getYAxisLabel = () => {
     switch (analysisType) {
-      case 'comparison':
+      case 'interestRate':
         return 'Interest Rate (%)';
+      case 'averageMaturity':
+        return 'Average Maturity (Years)';
+      case 'comparison':
+        return 'Value';
       case 'trend':
-        return 'Interest Rate Trend';
+        return 'Trend';
       case 'forecast':
-        return 'Forecasted Interest Rate (%)';
+        return 'Forecast';
       default:
         return 'Value';
     }
@@ -40,19 +36,33 @@ const InterestRateComparisonChart: React.FC<InterestRateComparisonChartProps> = 
 
   const getChartTitle = () => {
     switch (analysisType) {
+      case 'interestRate':
+        return 'Interest Rate Analysis';
+      case 'averageMaturity':
+        return 'Average Maturity Analysis';
       case 'comparison':
         return 'Interest Rate Comparison';
       case 'trend':
-        return 'Interest Rate Trend Analysis';
+        return 'Interest Rate Trend';
       case 'forecast':
         return 'Interest Rate Forecast';
       default:
-        return 'Interest Rate Analysis';
+        return 'Debt Analysis';
     }
   };
 
   const getLineDataKey = () => {
-    return analysisType === 'comparison' ? 'interestRate' : 'averageMaturity';
+    switch (analysisType) {
+      case 'interestRate':
+      case 'comparison':
+      case 'trend':
+      case 'forecast':
+        return 'interestRate';
+      case 'averageMaturity':
+        return 'averageMaturity';
+      default:
+        return 'interestRate';
+    }
   };
 
   return (

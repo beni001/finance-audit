@@ -1,66 +1,61 @@
 import React, { useState } from 'react';
+import { parseDebtData, parseProjectData } from '../utils/parsers';
+import { supabase } from '../lib/supabaseClient';
+import { DebtData, ProjectData, AnalysisType, InterestRateAnalysisType } from '../types';
 import ProjectLinkedDebtAnalysis from './Analysis/ProjectLinkedDebtAnalysis';
 import DebtCompositionPieChart from './Visualizations/DebtCompositionPieChart';
 import InterestRateComparisonChart from './Visualizations/InterestRateComparisonChart';
 import ProjectProgressChart from './Visualizations/ProjectProgressChart';
-import { DebtData, ProjectData, AnalysisType } from '../types/index';
-import { InterestRateAnalysisType } from '../types/componentProps';
-import { PDFDocumentProxy, getDocument } from 'pdfjs-dist';
-import { validatePDFContent, validateDebtData, validateProjectData } from '../utils/validations';
-import { parseDebtData, parseProjectData } from '../utils/parsers';
-import { TextItem } from 'pdfjs-dist/types/src/display/api';
 import FileUploader from './FileUploader';
-import DataExtractor from './DataExtractor';
 import FAQ from './FAQ';
+import { sampleDebtData, sampleProjectData } from '../data/sampleData';
+import { extractTextFromPDF } from '../utils/pdfExtractor';
 
 const App: React.FC = () => {
-  const [appDebtData, setAppDebtData] = useState<DebtData[]>([]);
-  const [appProjectData, setAppProjectData] = useState<ProjectData[]>([]);
+  const [appDebtData, setAppDebtData] = useState<DebtData[]>(sampleDebtData);
+  const [appProjectData, setAppProjectData] = useState<ProjectData[]>(sampleProjectData);
   const [debtAnalysisType, setDebtAnalysisType] = useState<AnalysisType>('composition');
   const [interestAnalysisType, setInterestAnalysisType] = useState<InterestRateAnalysisType>('comparison');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function parsePDF(file: File): Promise<PDFDocumentProxy> {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await getDocument({ data: arrayBuffer }).promise;
-    return pdf;
-  }
-
-  async function extractTextFromPDF(pdf: PDFDocumentProxy): Promise<string> {
-    let fullText = '';
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .filter((item): item is TextItem => 'str' in item)
-        .map(item => item.str)
-        .join(' ');
-      fullText += pageText + '\n';
-    }
-    return fullText;
-  }
-
-  async function handleFileUpload(file: File) {
+  const handleFileUpload = async (file: File) => {
+    setIsLoading(true);
+    setError(null);
     try {
-      const pdf = await parsePDF(file);
-      const text = await extractTextFromPDF(pdf);
+      // Extract text from PDF
+      const text = await extractTextFromPDF(file);
       
-      if (!validatePDFContent(text)) {
-        throw new Error('Invalid PDF content');
-      }
+      // Parse the extracted text
+      const debtData = parseDebtData(text);
+      const projectData = parseProjectData(text);
+      
+      // Upload to Supabase
+      const { data: debtInsertData, error: debtError } = await supabase
+        .from('debt')
+        .upsert(debtData);
+      
+      const { data: projectInsertData, error: projectError } = await supabase
+        .from('projects')
+        .upsert(projectData);
 
-      const extractedDebtData = parseDebtData(text);
-      const extractedProjectData = parseProjectData(text);
-
-      if (!validateDebtData(extractedDebtData) || !validateProjectData(extractedProjectData)) {
-        throw new Error('Invalid data extracted from PDF');
-      }
-
-      setAppDebtData(extractedDebtData as DebtData[]);
-      setAppProjectData(extractedProjectData as ProjectData[]);
+      if (debtError) throw debtError;
+      if (projectError) throw projectError;
+      
+      setAppDebtData(debtData);
+      setAppProjectData(projectData);
+      console.log('Data successfully uploaded to Supabase');
     } catch (error) {
       console.error('Error processing PDF:', error);
-      // Handle error (e.g., show error message to user)
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // Render error message if there's an error
+  if (error) {
+    return <div className="error-message">{error}</div>;
   }
 
   return (
@@ -70,8 +65,8 @@ const App: React.FC = () => {
       </header>
 
       <main className="flex-grow container mx-auto px-4 py-8 space-y-8">
-        <FileUploader onFileUpload={handleFileUpload} />
-        <DataExtractor debtData={appDebtData} projectData={appProjectData} />
+        {isLoading && <p className="text-center">Loading...</p>}
+        {error && <p className="text-red-500 text-center">{error}</p>}
         
         <ProjectProgressChart projectData={appProjectData} />
         
@@ -109,10 +104,12 @@ const App: React.FC = () => {
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-bold mb-4">Project-Linked Debt Analysis</h2>
           <ProjectLinkedDebtAnalysis 
-            debtData={appDebtData as DebtData[]} 
-            projectData={appProjectData as ProjectData[]} 
+            debtData={appDebtData} 
+            projectData={appProjectData} 
           />
         </div>
+
+        <FileUploader onFileUpload={handleFileUpload} />
 
         <FAQ />
       </main>

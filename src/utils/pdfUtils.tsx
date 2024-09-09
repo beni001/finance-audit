@@ -86,3 +86,17 @@ export async function loadPDFFromPublic(filename: string): Promise<PDFDocumentPr
     throw new Error('Failed to load PDF from public folder');
   }
 }
+
+export async function extractTextFromPDF(file: File): Promise<string> {
+  const pdf = await parsePDF(file);
+  let pdfText = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const textContent = await page.getTextContent();
+    pdfText += textContent.items
+      .filter((item: any): item is TextItem => 'str' in item)
+      .map((item: any) => item.str)
+      .join(' ');
+  }
+  return pdfText.trim();
+}

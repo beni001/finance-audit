@@ -2,19 +2,9 @@ import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { AnalysisType } from '../../types/analysis';
+import { AnalysisType, DebtData } from '../../types';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
-
-interface DebtData {
-  creditorName: string;
-  loanAmount: number;
-  currency: string;
-  projectName: string;
-  interestRate: number;
-  loanDuration: number;
-  debtType: 'bilateral' | 'multilateral' | 'commercial';
-}
 
 interface DebtCompositionPieChartProps {
   debtData: DebtData[];

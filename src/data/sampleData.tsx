@@ -1,0 +1,118 @@
+import { DebtData, ProjectData, Creditor, Loan } from '../types';
+
+export const sampleDebtData: DebtData[] = [
+  {
+    id: '1',
+    year: 2020,
+    interestRate: 2.5,
+    averageMaturity: 10,
+    creditorName: 'World Bank',
+    loanAmount: 1000000,
+    currency: 'USD',
+    projectName: 'Infrastructure Development',
+    loanDuration: 10,
+    debtType: 'multilateral',
+    totalDebt: 1000000,
+    externalDebt: 1000000,
+  },
+  {
+    id: '2',
+    year: 2020,
+    interestRate: 3.0,
+    averageMaturity: 5,
+    creditorName: 'National Bank',
+    loanAmount: 750000,
+    currency: 'EUR',
+    projectName: 'Education Reform',
+    loanDuration: 5,
+    debtType: 'bilateral',
+    totalDebt: 750000,
+    domesticDebt: 750000,
+  },
+  {
+    id: '3',
+    year: 2021,
+    interestRate: 1.8,
+    averageMaturity: 7,
+    creditorName: 'Asian Development Bank',
+    loanAmount: 500000,
+    currency: 'JPY',
+    projectName: 'Healthcare Initiative',
+    loanDuration: 7,
+    debtType: 'multilateral',
+    totalDebt: 500000,
+    externalDebt: 500000,
+  },
+];
+
+export const sampleProjectData: ProjectData[] = [
+  {
+    id: '1',
+    projectName: 'Infrastructure Development',
+    budget: 500000,
+    year: 2020,
+    progress: 65,
+    totalLoanAmount: 1000000,
+    amountUtilized: 650000,
+    startDate: new Date('2020-01-01'),
+    expectedEndDate: new Date('2023-12-31'),
+  },
+  {
+    id: '2',
+    projectName: 'Education Reform',
+    budget: 300000,
+    year: 2021,
+    progress: 40,
+    totalLoanAmount: 750000,
+    amountUtilized: 300000,
+    startDate: new Date('2021-03-15'),
+    expectedEndDate: new Date('2024-03-14'),
+  },
+  {
+    id: '3',
+    projectName: 'Healthcare Initiative',
+    budget: 400000,
+    year: 2022,
+    progress: 25,
+    totalLoanAmount: 500000,
+    amountUtilized: 125000,
+    startDate: new Date('2022-07-01'),
+    expectedEndDate: new Date('2025-06-30'),
+  },
+];
+
+export const sampleCreditors: Creditor[] = [
+  { id: '1', name: 'World Bank', type: 'International Organization' },
+  { id: '2', name: 'National Bank', type: 'Domestic Bank' },
+  { id: '3', name: 'Asian Development Bank', type: 'International Organization' },
+];
+
+export const sampleLoans: Loan[] = [
+  {
+    id: '1',
+    creditor_id: '1',
+    currency: 'USD',
+    amount_outstanding: 1000000,
+    year: 2020,
+    interest_rate: 2.5,
+    maturity_date: '2030-12-31',
+  },
+  {
+    id: '2',
+    creditor_id: '2',
+    currency: 'EUR',
+    amount_outstanding: 750000,
+    year: 2020,
+    interest_rate: 3.0,
+    maturity_date: '2025-06-30',
+  },
+  {
+    id: '3',
+    creditor_id: '3',
+    currency: 'JPY',
+    amount_outstanding: 500000,
+    year: 2021,
+    interest_rate: 1.8,
+    maturity_date: '2028-09-30',
+  },
+];
